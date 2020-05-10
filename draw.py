@@ -14,7 +14,10 @@ def draw_all_lines(img, lines, color=[255, 0, 0], thickness=3):
 def draw_arrow(img, arrow, width, decalage=10, color=[0, 0, 255], thickness=2):
 	degree = int(arrow.degree_turn())
 	middle = int(width / 2)
-	cv2.arrowedLine(img, (middle, decalage), (middle + degree, decalage), color, thickness)
+	try:
+		cv2.arrowedLine(img, (middle, decalage), (middle + degree, decalage), color, thickness)
+	except:
+		pass
 
 def draw_infos(img, p, l1, l2) :
 	cv2.circle(img, (int(p.x), int(p.y)), 2, [0, 0, 255], 10)

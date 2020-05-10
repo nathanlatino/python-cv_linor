@@ -1,7 +1,11 @@
-import numpy as np
-import pyscreenshot as ImageGrab
+import os
+import time
+
+import numpy
+from mss import mss
 import numpy as np
 import cv2
+from PIL import Image
 
 from arrow import Arrow
 from pretreatment import zone_mask, color_mask, morpho_process, apply_canny, apply_gaussian
@@ -134,7 +138,7 @@ def process_img(image, meta):
 	trapeze = Trapeze(meta.width, meta.height)
 	vertices = [np.array([trapeze.hl1, trapeze.hl2, trapeze.hl3,
 						  trapeze.hr1, trapeze.hr2, trapeze.hr3], np.int32)]
-	processed_img = zone_mask(processed_img, vertices)
+	# processed_img = zone_mask(processed_img, vertices)
 
 	return processed_img
 
@@ -143,24 +147,41 @@ def screen_record():
 	x, y, w, h = 960, 40, 1920, 552
 	meta = MetaData.from_screen(w-x, h-y)
 	arrow = Arrow(meta.width)
-	while True:
-		frame = np.array(ImageGrab.grab((x, y, w, h)))
-		try:
-			processed_img = process_img(frame, meta)
-			lines = find_lines(processed_img)
-			l1, l2 = separate_lines(lines)
-			p = intersect_droit(l1, l2)
-			arrow.add_point(int(p.x))
-			draw_infos(frame, p, l1, l2)
-		except:
-			pass
-		draw_arrow(frame, arrow, meta.width)
+	with mss() as sct:
+		# Part of the screen to capture
+		monitor = {"top": 40, "left": 0, "width": 800, "height": 640}
+		active = False
+		while "Screen capturing":
+			if cv2.waitKey(25) & 0xFF == ord("g"):
+				active = not active
+			last_time = time.time()
+			# Get raw pixels from the screen, save it to a Numpy array
+			frame = numpy.array(sct.grab(monitor))
+			if active:
+				try:
+					processed_img = process_img(frame, meta)
+					lines = find_lines(processed_img)
+					l1, l2 = separate_lines(lines)
+					p = intersect_droit(l1, l2)
+					arrow.add_point(int(p.x))
+					draw_infos(frame, p, l1, l2)
+				except:
+					pass
+				draw_arrow(frame, arrow, meta.width)
 
-		# cv2.imshow('window', processed_img)
-		cv2.imshow('window', frame)
-		if cv2.waitKey(25) & 0xFF == ord('q'):
-			cv2.destroyAllWindows()
-			break
+			# Display the picture
+			cv2.imshow("OpenCV/Numpy normal", frame)
+
+			# Display the picture in grayscale
+			# cv2.imshow('OpenCV/Numpy grayscale',
+			#            cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY))
+
+			print("fps: {}".format(1 / (time.time() - last_time)))
+
+			# Press "q" to quit
+			if cv2.waitKey(25) & 0xFF == ord("q"):
+				cv2.destroyAllWindows()
+				break
 
 
 def video_record(video):
@@ -192,6 +213,6 @@ def video_record(video):
 
 
 if __name__ == '__main__':
-	# screen_record()
-	video_record("./resources/road.mp4")
+	screen_record()
+	# video_record("./resources/road.mp4")
 	exit(0)
