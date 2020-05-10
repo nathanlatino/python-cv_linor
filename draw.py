@@ -11,10 +11,23 @@ def draw_all_lines(img, lines, color=[255, 0, 0], thickness=3):
 			cv2.line(img, (xyxy[0], xyxy[1]), (xyxy[2], xyxy[3]), color, thickness)
 
 
-def draw_arrow(img, arrow, width, decalage=10, color=[0, 0, 255], thickness=2):
-	degree = int(arrow.degree_turn())
-	middle = int(width / 2)
-	cv2.arrowedLine(img, (middle, decalage), (middle + degree, decalage), color, thickness)
+def draw_arrow(img, arrow, width, y_offset=500, color=[255, 0, 0], thickness=2, x_offset=0):
+	center = int(width / 2) + x_offset
+	mag = int(arrow.degree_turn())
+	dot = center + mag
+
+	left_bound = (center - 300, y_offset)
+	right_bound = (center + 300, y_offset)
+
+
+
+	try:
+		cv2.line(img, left_bound, right_bound, [255, 255, 255], 1)
+		cv2.circle(img, (dot, y_offset), 2, [255, 0, 255], 15)
+		# cv2.arrowedLine(img, (center, y_offset), (center + mag, y_offset), color, thickness)
+	except:
+		pass
+
 
 def draw_infos(img, p, l1, l2) :
 	cv2.circle(img, (int(p.x), int(p.y)), 2, [0, 0, 255], 10)

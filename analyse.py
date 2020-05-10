@@ -1,4 +1,3 @@
-import numpy as np
 import pyscreenshot as ImageGrab
 import numpy as np
 import cv2
@@ -120,21 +119,25 @@ def process_img(image, meta):
 	upper_white = np.array([250, 255, 255])
 	processed_img = color_mask(original_image, low_white, upper_white)
 
-	# cv2.imshow('window', processed_img)
+
 	# Erode, dilate
 	processed_img = morpho_process(processed_img)
+	# cv2.imshow('window1', processed_img)
 
 	# Canny
 	processed_img = apply_canny(processed_img)
+	# cv2.imshow('window2', processed_img)
 
 	# filtre gaussian
 	processed_img = apply_gaussian(processed_img)
+	# cv2.imshow('window3', processed_img)
 
 	# mask zone trapeze
 	trapeze = Trapeze(meta.width, meta.height)
 	vertices = [np.array([trapeze.hl1, trapeze.hl2, trapeze.hl3,
 						  trapeze.hr1, trapeze.hr2, trapeze.hr3], np.int32)]
 	processed_img = zone_mask(processed_img, vertices)
+	# cv2.imshow('window4', processed_img)
 
 	return processed_img
 
@@ -178,12 +181,24 @@ def video_record(video):
 				l1, l2 = separate_lines(lines)
 				p = intersect_droit(l1, l2)
 				arrow.add_point(int(p.x))
+
+				processed_img = cv2.cvtColor(processed_img, cv2.COLOR_GRAY2BGR)
+
+
+
+				# draw_infos(processed_img, p, l1, l2)
+				# draw_arrow(processed_img, arrow, meta.width)
+				# cv2.imshow('window', processed_img)
+
 				draw_infos(frame, p, l1, l2)
+				draw_arrow(frame, arrow, meta.width)
+				cv2.imshow('window', frame)
+
 			except:
 				pass
-			draw_arrow(frame, arrow, meta.width)
+			# draw_arrow(frame, arrow, meta.width)
 
-			cv2.imshow('window', frame)
+			# cv2.imshow('window', frame)
 		if cv2.waitKey(25) & 0xFF == ord('q'):
 			break
 
