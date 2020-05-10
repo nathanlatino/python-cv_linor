@@ -129,15 +129,6 @@ def process_img(image, meta):
 	processed_img = color_mask(processed_img, low_white, upper_white)
 	# cv2.imshow('window1', processed_img1)
 
-
-	low_white = np.array([10, 20, 0])
-	upper_white = np.array([255, 255, 60])
-	# processed_img2 = color_mask(processed_img, low_white, upper_white)
-
-	# processed_img = processed_img1 - processed_img2
-	cv2.imshow('window1', processed_img)
-
-
 	# Erode, dilate
 	processed_img = morpho_process(processed_img)
 	# cv2.imshow('window2', processed_img)
