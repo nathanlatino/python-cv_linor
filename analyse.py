@@ -1,12 +1,10 @@
-<<<<<<< HEAD
+
 import os
 import time
 
 import numpy
 from mss import mss
-=======
-import pyscreenshot as ImageGrab
->>>>>>> origin/layout
+
 import numpy as np
 import cv2
 from PIL import Image
@@ -145,12 +143,8 @@ def process_img(image, meta):
 	trapeze = Trapeze(meta.width, meta.height)
 	vertices = [np.array([trapeze.hl1, trapeze.hl2, trapeze.hl3,
 						  trapeze.hr1, trapeze.hr2, trapeze.hr3], np.int32)]
-<<<<<<< HEAD
+
 	processed_img = zone_mask(processed_img, vertices)
-=======
-	processed_img = zone_mask(processed_img, vertices)
-	# cv2.imshow('window4', processed_img)
->>>>>>> origin/layout
 
 	return processed_img
 
