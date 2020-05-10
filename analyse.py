@@ -130,27 +130,37 @@ def process_img(image, meta):
 
 
 	# Erode, dilate
-	processed_img = morpho_process(processed_img)
+	# processed_img = morpho_process(processed_img)
 	# cv2.imshow('window2', processed_img)
-	# filtre gaussian
-	processed_img = apply_gaussian(processed_img)
-	# cv2.imshow('window3', processed_img)
-	# Canny
-	processed_img = apply_canny(processed_img,90, 120)
 
+
+
+
+
+	processed_img  = cv2.cvtColor(processed_img, cv2.COLOR_BGR2GRAY)
+	# filtre gaussian
+	processed_img = apply_gaussian(processed_img, sigmax=3)
+	cv2.imshow('gaussian', processed_img)
+
+
+
+	# Canny
+	processed_img = apply_canny(processed_img, 80, 110)
+	cv2.imshow('canny', processed_img)
 
 	# Erode, dilate
 	processed_img = morpho_process(processed_img)
+	cv2.imshow('morph', processed_img)
 
 
 
 	# mask zone trapeze
 	trapeze = Trapeze(meta.width, meta.height)
-	vertices = [np.array([trapeze.hl1, trapeze.hl2, trapeze.hl3,
-						  trapeze.hr1, trapeze.hr2, trapeze.hr3], np.int32)]
+	vertices = [np.array([trapeze.hl2, trapeze.hl3, trapeze.hr3, trapeze.hr2
+						   ], np.int32)]
 
 	processed_img = zone_mask(processed_img, vertices)
-	# cv2.imshow('window2', processed_img)
+	cv2.imshow('final', processed_img)
 	return processed_img
 
 

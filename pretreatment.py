@@ -23,14 +23,18 @@ def apply_gaussian(img, kernel = (5,5), sigmax = 0):
 def morpho_process(img):
 	img2 = img
 	# delete lines
-	img2 = morph(img, (4,4))
-	img2 = morph(img, (4, 4),  mode='d')
+	# img2 = morph(img2, (10, 10), mode='d')
+	# img2 = morph(img2, (10,10))
+	img2 = morph(img2, (3, 3), mode='d')
+	img2 = morph(img2, (2,2))
+	img2 = morph(img2, (2,2), mode='d')
 	# strengthen intersections
 	# img2 = morph(img, (9, 9), 3, mode='d')
 	# img2 = morph(img2, (4, 4), 2)
 	# close remaining blobs
-	img2 = morph(img2, (3,3), mode='d')
-	img2 = morph(img2, (2,2))
+	img2 = morph(img2, (2, 2))
+	img2 = morph(img2, (2,2), mode='d')
+
 	#
 	# img2 = morph(img2, (1,1),2 )
 	# img2 = morph(img2, (1,1), mode='d')
