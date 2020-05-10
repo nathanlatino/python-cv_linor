@@ -2,6 +2,7 @@ import numpy as np
 class Arrow:
 	def __init__(self, width):
 		self.x = []
+		self.x.append(0)
 		self.w = width
 
 	def degree_turn(self):

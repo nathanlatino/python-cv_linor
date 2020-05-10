@@ -1,26 +1,28 @@
 import numpy as np
 from cv2 import cv2
 
-def roi(img, vertices):
+
+def color_mask(img, low, upper):
+	hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+	return cv2.inRange(hsv, low, upper)
+
+def zone_mask(img, vertices):
 	# blank mask:
 	mask = np.zeros_like(img)
 	# fill the mask
 	cv2.fillPoly(mask, vertices, 255)
 	# now only show the area that is the mask
-	masked = cv2.bitwise_and(img, mask)
-	return masked
+	return cv2.bitwise_and(img, mask)
 
-def white_mask(img):
-	hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-	low_white = np.array([100, 0, 210])
-	upper_white = np.array([250, 255, 255])
+def apply_canny(img, threshold1 = 200, threshold2 = 300):
+	return cv2.Canny(img, threshold1, threshold2)
 
-	mask = cv2.inRange(hsv, low_white, upper_white)
-	return mask
+def apply_gaussian(img, kernel = (5,5), sigmax = 0):
+	return cv2.GaussianBlur(img, kernel, sigmax)
 
 def morpho_process(img):
 	# delete lines
-	# img2 = morph(img, (4,4))
+	img2 = morph(img, (4,4))
 	# strengthen intersections
 	img2 = morph(img, (9, 9), 3, mode='d')
 	img2 = morph(img2, (4, 4), 2)
