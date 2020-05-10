@@ -100,7 +100,26 @@ def separate_lines(lines):
 	lane1_id = top_lanes[0][0]
 	lane2_id = top_lanes[1][0]
 
-	return average_lane(final_lanes[lane1_id]), average_lane(final_lanes[lane2_id])
+	pt = average_point([final_lanes[lane1_id], final_lanes[lane2_id]])
+	# print(f"x : {pt.x}; y : {pt.y}")
+	return pt
+
+	# return average_lane(final_lanes[lane1_id]), average_lane(final_lanes[lane2_id])
+
+def average_point(all_lanes):
+	ptsx = []
+	ptsy = []
+	for rlane in all_lanes[0]:
+		for llane in all_lanes[1]:
+			rh = rlane[2][1] - rlane[2][3]
+			lh = llane[2][1] - llane[2][3]
+			if abs(rh) > 50 and abs(lh) > 50:
+				pt = intersect_droit(rlane[2], llane[2])
+				ptsx.append(pt.x)
+				ptsy.append(pt.y)
+
+	return Point(np.mean(ptsx), np.mean(ptsy))
+
 
 
 def average_lane(lane_data):
@@ -135,7 +154,6 @@ def process_img(image, meta):
 
 
 	processed_img  = cv2.cvtColor(processed_img, cv2.COLOR_BGR2HSV)
-	processed_img[:, :, 2] += 50
 	processed_img = cv2.cvtColor(processed_img, cv2.COLOR_HSV2RGB)
 	processed_img = cv2.cvtColor(processed_img, cv2.COLOR_BGR2GRAY)
 
@@ -181,10 +199,13 @@ def screen_record():
 				try:
 					processed_img = process_img(frame, meta)
 					lines = find_lines(processed_img)
-					l1, l2 = separate_lines(lines)
-					p = intersect_droit(l1, l2)
+					# l1, l2 = separate_lines(lines)
+					# p = intersect_droit(l1, l2)
+
+					p = separate_lines(lines)
+					cv2.circle(frame, (int(p.x), int(p.y)), 2, [0, 255, 255], 10)
 					arrow.add_point(int(p.x))
-					draw_infos(frame, p, l1, l2)
+					# draw_infos(frame, p, l1, l2)
 					# cv2.imshow('window', processed_img)
 				except:
 					pass
