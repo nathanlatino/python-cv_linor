@@ -134,15 +134,14 @@ def process_img(image, meta):
 	# cv2.imshow('window2', processed_img)
 
 
+	processed_img  = cv2.cvtColor(processed_img, cv2.COLOR_BGR2HSV)
+	processed_img[:, :, 2] += 50
+	processed_img = cv2.cvtColor(processed_img, cv2.COLOR_HSV2RGB)
+	processed_img = cv2.cvtColor(processed_img, cv2.COLOR_BGR2GRAY)
 
-
-
-	processed_img  = cv2.cvtColor(processed_img, cv2.COLOR_BGR2GRAY)
 	# filtre gaussian
 	processed_img = apply_gaussian(processed_img, sigmax=3)
 	cv2.imshow('gaussian', processed_img)
-
-
 
 	# Canny
 	processed_img = apply_canny(processed_img, 80, 110)
@@ -186,7 +185,6 @@ def screen_record():
 					p = intersect_droit(l1, l2)
 					arrow.add_point(int(p.x))
 					draw_infos(frame, p, l1, l2)
-					print("ici")
 					# cv2.imshow('window', processed_img)
 				except:
 					pass

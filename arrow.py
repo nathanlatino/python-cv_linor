@@ -6,9 +6,9 @@ class Arrow:
 		self.w = width
 
 	def degree_turn(self):
-		return np.mean(self.x)-self.w/2
+		return np.median(self.x)-self.w/2
 
 	def add_point(self,x):
-		if len(self.x) > 400:
+		if len(self.x) > 200:
 			self.x.pop(0)
 		self.x.append(x)
