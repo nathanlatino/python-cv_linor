@@ -119,25 +119,39 @@ def average_lane(lane_data):
 	return [int(np.mean(x1s)), int(np.mean(y1s)), int(np.mean(x2s)), int(np.mean(y2s))]
 
 def process_img(image, meta):
-	original_image = image
+	processed_img = image
 
 	# mask line
-	low_white = np.array([100, 0, 210])
-	upper_white = np.array([250, 255, 255])
-	processed_img = color_mask(original_image, low_white, upper_white)
+	# low_white = np.array([100, 0, 210])
+	# upper_white = np.array([250, 255, 255])
+	low_white = np.array([10, 10, 70])
+	upper_white = np.array([255, 250, 200])
+	processed_img = color_mask(processed_img, low_white, upper_white)
+	# cv2.imshow('window1', processed_img1)
+
+
+	low_white = np.array([10, 20, 0])
+	upper_white = np.array([255, 255, 60])
+	# processed_img2 = color_mask(processed_img, low_white, upper_white)
+
+	# processed_img = processed_img1 - processed_img2
+	cv2.imshow('window1', processed_img)
 
 
 	# Erode, dilate
 	processed_img = morpho_process(processed_img)
-	# cv2.imshow('window1', processed_img)
-
-	# Canny
-	processed_img = apply_canny(processed_img)
 	# cv2.imshow('window2', processed_img)
-
 	# filtre gaussian
 	processed_img = apply_gaussian(processed_img)
 	# cv2.imshow('window3', processed_img)
+	# Canny
+	processed_img = apply_canny(processed_img,90, 120)
+
+
+	# Erode, dilate
+	processed_img = morpho_process(processed_img)
+	# cv2.imshow('window2', processed_img)
+
 
 	# mask zone trapeze
 	trapeze = Trapeze(meta.width, meta.height)
@@ -145,21 +159,22 @@ def process_img(image, meta):
 						  trapeze.hr1, trapeze.hr2, trapeze.hr3], np.int32)]
 
 	processed_img = zone_mask(processed_img, vertices)
+	# cv2.imshow('window4', processed_img)
 
 	return processed_img
 
 
 def screen_record():
-	x, y, w, h = 960, 40, 1920, 552
+	x, y, w, h = 960, 40, 1200, 552
 	meta = MetaData.from_screen(w-x, h-y)
 	arrow = Arrow(meta.width)
 	with mss() as sct:
 		# Part of the screen to capture
-		monitor = {"top": 40, "left": 0, "width": 800, "height": 640}
-		active = False
+		monitor = {"top": 60, "left": 0, "width": 1900, "height": 1000}
+		active = True
 		while "Screen capturing":
-			if cv2.waitKey(25) & 0xFF == ord("g"):
-				active = not active
+			# if cv2.waitKey(50) & 0xFF == ord("g"):
+			# 	active = not active
 			last_time = time.time()
 			# Get raw pixels from the screen, save it to a Numpy array
 			frame = numpy.array(sct.grab(monitor))
@@ -171,12 +186,14 @@ def screen_record():
 					p = intersect_droit(l1, l2)
 					arrow.add_point(int(p.x))
 					draw_infos(frame, p, l1, l2)
+					# cv2.imshow('window', processed_img)
 				except:
 					pass
 				draw_arrow(frame, arrow, meta.width)
 
 			# Display the picture
-			cv2.imshow("OpenCV/Numpy normal", frame)
+
+			# cv2.imshow("OpenCV/Numpy normal", frame)
 
 			# Display the picture in grayscale
 			# cv2.imshow('OpenCV/Numpy grayscale',
@@ -185,7 +202,7 @@ def screen_record():
 			print("fps: {}".format(1 / (time.time() - last_time)))
 
 			# Press "q" to quit
-			if cv2.waitKey(25) & 0xFF == ord("q"):
+			if cv2.waitKey(50) & 0xFF == ord("q"):
 				cv2.destroyAllWindows()
 				break
 
@@ -212,7 +229,7 @@ def video_record(video):
 
 				# draw_infos(processed_img, p, l1, l2)
 				# draw_arrow(processed_img, arrow, meta.width)
-				# cv2.imshow('window', processed_img)
+				cv2.imshow('window', processed_img)
 
 				draw_infos(frame, p, l1, l2)
 				draw_arrow(frame, arrow, meta.width)

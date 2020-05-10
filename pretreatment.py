@@ -21,16 +21,25 @@ def apply_gaussian(img, kernel = (5,5), sigmax = 0):
 	return cv2.GaussianBlur(img, kernel, sigmax)
 
 def morpho_process(img):
+	img2 = img
 	# delete lines
 	img2 = morph(img, (4,4))
+	img2 = morph(img, (4, 4),  mode='d')
 	# strengthen intersections
-	img2 = morph(img, (9, 9), 3, mode='d')
-	img2 = morph(img2, (4, 4), 2)
+	# img2 = morph(img, (9, 9), 3, mode='d')
+	# img2 = morph(img2, (4, 4), 2)
 	# close remaining blobs
-	img2 = morph(img2, (12, 12))
-	img2 = morph(img2, (12, 12), mode='d')
-	img2 = morph(img2, (12, 12))
-	img2 = morph(img2, (3, 3))
+	img2 = morph(img2, (3,3), mode='d')
+	img2 = morph(img2, (2,2))
+	#
+	# img2 = morph(img2, (1,1),2 )
+	# img2 = morph(img2, (1,1), mode='d')
+
+
+	# img2 = morph(img2, (2,2) )
+	# img2 = morph(img2, (2,2),  mode='d')
+	# img2 = morph(img2, (12, 12))
+	# img2 = morph(img2, (3, 3))
 	return img2
 
 def morph(img, size=(3, 3), iteration=1, mode='e'):
