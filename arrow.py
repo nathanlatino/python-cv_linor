@@ -9,6 +9,6 @@ class Arrow:
 		return np.mean(self.x)-self.w/2
 
 	def add_point(self,x):
-		if len(self.x) > 1000:
+		if len(self.x) > 400:
 			self.x.pop(0)
 		self.x.append(x)

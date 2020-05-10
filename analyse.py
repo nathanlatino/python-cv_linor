@@ -124,10 +124,10 @@ def process_img(image, meta):
 	# mask line
 	# low_white = np.array([100, 0, 210])
 	# upper_white = np.array([250, 255, 255])
-	low_white = np.array([10, 10, 70])
-	upper_white = np.array([255, 250, 200])
-	processed_img = color_mask(processed_img, low_white, upper_white)
-	# cv2.imshow('window1', processed_img1)
+	# low_white = np.array([10, 30, 70])
+	# upper_white = np.array([160, 250, 120])
+	# processed_img = color_mask(processed_img, low_white, upper_white)
+
 
 	# Erode, dilate
 	processed_img = morpho_process(processed_img)
@@ -141,7 +141,7 @@ def process_img(image, meta):
 
 	# Erode, dilate
 	processed_img = morpho_process(processed_img)
-	# cv2.imshow('window2', processed_img)
+
 
 
 	# mask zone trapeze
@@ -150,18 +150,17 @@ def process_img(image, meta):
 						  trapeze.hr1, trapeze.hr2, trapeze.hr3], np.int32)]
 
 	processed_img = zone_mask(processed_img, vertices)
-	# cv2.imshow('window4', processed_img)
-
+	# cv2.imshow('window2', processed_img)
 	return processed_img
 
 
 def screen_record():
-	x, y, w, h = 960, 40, 1200, 552
+	x, y, w, h = 0, 0, 1280, 768
 	meta = MetaData.from_screen(w-x, h-y)
 	arrow = Arrow(meta.width)
 	with mss() as sct:
 		# Part of the screen to capture
-		monitor = {"top": 60, "left": 0, "width": 1900, "height": 1000}
+		monitor = {"top": y, "left": x, "width": w, "height": h}
 		active = True
 		while "Screen capturing":
 			# if cv2.waitKey(50) & 0xFF == ord("g"):
@@ -177,6 +176,7 @@ def screen_record():
 					p = intersect_droit(l1, l2)
 					arrow.add_point(int(p.x))
 					draw_infos(frame, p, l1, l2)
+					print("ici")
 					# cv2.imshow('window', processed_img)
 				except:
 					pass
@@ -184,7 +184,7 @@ def screen_record():
 
 			# Display the picture
 
-			# cv2.imshow("OpenCV/Numpy normal", frame)
+			cv2.imshow("OpenCV/Numpy normal", frame)
 
 			# Display the picture in grayscale
 			# cv2.imshow('OpenCV/Numpy grayscale',
