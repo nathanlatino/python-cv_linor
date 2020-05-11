@@ -1,4 +1,3 @@
-
 import os
 import time
 
@@ -10,19 +9,22 @@ import cv2
 from PIL import Image
 
 from arrow import Arrow
-from pretreatment import zone_mask, color_mask, morpho_process, apply_canny, apply_gaussian
+from pretreatment import zone_mask, color_mask, morpho_process, apply_canny, \
+	apply_gaussian
 from metadata import MetaData
 from draw import draw_infos, draw_arrow
 from trapeze import Trapeze
 
-from point import Point
+from Tests.Line import Point
 from numpy import ones, vstack
 from numpy.linalg import lstsq
 
 
-def find_lines(image, rho=1, theta=np.pi / 180, threshold=150, min_line_length=20, max_line_gap=15):
+def find_lines(image, rho=1, theta=np.pi / 180, threshold=150,
+			   min_line_length=20, max_line_gap=15):
 	# get lines with Hough algo
-	return cv2.HoughLinesP(image, rho, theta, threshold, np.array([]), min_line_length, max_line_gap)
+	return cv2.HoughLinesP(image, rho, theta, threshold, np.array([]),
+						   min_line_length, max_line_gap)
 
 
 def intersect_droit(l1, l2):
@@ -37,6 +39,7 @@ def intersect_droit(l1, l2):
 
 	return Point(x, y)
 
+
 def separate_lines(lines):
 	ys = []
 	for i in lines:
@@ -47,11 +50,13 @@ def separate_lines(lines):
 	new_lines = []
 	line_dict = {}
 
-	for idx, i in enumerate(lines):
+	for c, i in enumerate(lines):
 		for xyxy in i:
 			# These four lines:
-			# modified from http://stackoverflow.com/questions/21565994/method-to-return-the-equation-of-a-straight-line-given-two-points
-			# Used to calculate the definition of a line, given two sets of coords.
+			# modified from http://stackoverflow.com/questions/21565994/method
+			# -to-return-the-equation-of-a-straight-line-given-two-points
+			# Used to calculate the definition of a line, given two sets of
+			# coords.
 			x_coords = (xyxy[0], xyxy[2])
 			y_coords = (xyxy[1], xyxy[3])
 			A = vstack([x_coords, ones(len(x_coords))]).T
@@ -61,16 +66,16 @@ def separate_lines(lines):
 			x1 = (min_y - b) / m
 			x2 = (max_y - b) / m
 
-			line_dict[idx] = [m, b, [int(x1), min_y, int(x2), max_y]]
+			line_dict[c] = [m, b, [int(x1), min_y, int(x2), max_y]]
 			new_lines.append([int(x1), min_y, int(x2), max_y])
 
 	final_lanes = {}
 
-	for idx in line_dict:
+	for key in line_dict:
 		final_lanes_copy = final_lanes.copy()
-		m = line_dict[idx][0]
-		b = line_dict[idx][1]
-		line = line_dict[idx][2]
+		m = line_dict[key][0]
+		b = line_dict[key][1]
+		line = line_dict[key][2]
 
 		if len(final_lanes) == 0:
 			final_lanes[m] = [[m, b, line]]
@@ -82,7 +87,8 @@ def separate_lines(lines):
 
 				if not found_copy:
 					if abs(other_ms * 1.2) > abs(m) > abs(other_ms * 0.8):
-						if abs(final_lanes_copy[other_ms][0][1] * 1.2) > abs(b) > abs(
+						if abs(final_lanes_copy[other_ms][0][1] * 1.2) > abs(
+								b) > abs(
 								final_lanes_copy[other_ms][0][1] * 0.8):
 							final_lanes[other_ms].append([m, b, line])
 							found_copy = True
@@ -95,7 +101,8 @@ def separate_lines(lines):
 	for lanes in final_lanes:
 		line_counter[lanes] = len(final_lanes[lanes])
 
-	top_lanes = sorted(line_counter.items(), key=lambda item: item[1])[::-1][:2]
+	top_lanes = sorted(line_counter.items(), key=lambda item: item[1])[
+				::-1][:2]
 
 	lane1_id = top_lanes[0][0]
 	lane2_id = top_lanes[1][0]
@@ -104,7 +111,9 @@ def separate_lines(lines):
 	# print(f"x : {pt.x}; y : {pt.y}")
 	return pt
 
-	# return average_lane(final_lanes[lane1_id]), average_lane(final_lanes[lane2_id])
+
+# return average_lane(final_lanes[lane1_id]), average_lane(final_lanes[
+# lane2_id])
 
 def average_point(all_lanes):
 	ptsx = []
@@ -121,7 +130,6 @@ def average_point(all_lanes):
 	return Point(np.mean(ptsx), np.mean(ptsy))
 
 
-
 def average_lane(lane_data):
 	x1s = []
 	y1s = []
@@ -135,46 +143,32 @@ def average_lane(lane_data):
 			x2s.append(data[2][2])
 			y2s.append(data[2][3])
 
-	return [int(np.mean(x1s)), int(np.mean(y1s)), int(np.mean(x2s)), int(np.mean(y2s))]
+	return [int(np.mean(x1s)), int(np.mean(y1s)), int(np.mean(x2s)),
+			int(np.mean(y2s))]
+
 
 def process_img(image, meta):
 	processed_img = image
 
-	# mask line
-	# low_white = np.array([100, 0, 210])
-	# upper_white = np.array([250, 255, 255])
-	# low_white = np.array([10, 30, 70])
-	# upper_white = np.array([160, 250, 120])
-	# processed_img = color_mask(processed_img, low_white, upper_white)
-
-
-	# Erode, dilate
-	# processed_img = morpho_process(processed_img)
-	# cv2.imshow('window2', processed_img)
-
-
-	processed_img  = cv2.cvtColor(processed_img, cv2.COLOR_BGR2HSV)
+	processed_img = cv2.cvtColor(processed_img, cv2.COLOR_BGR2HSV)
 	processed_img = cv2.cvtColor(processed_img, cv2.COLOR_HSV2RGB)
 	processed_img = cv2.cvtColor(processed_img, cv2.COLOR_BGR2GRAY)
 
 	# filtre gaussian
 	processed_img = apply_gaussian(processed_img, sigmax=3)
-	cv2.imshow('gaussian', processed_img)
+	# cv2.imshow('gaussian', processed_img)
 
 	# Canny
 	processed_img = apply_canny(processed_img, 80, 110)
-	cv2.imshow('canny', processed_img)
+	# cv2.imshow('canny', processed_img)
 
 	# Erode, dilate
 	processed_img = morpho_process(processed_img)
 	cv2.imshow('morph', processed_img)
 
-
-
 	# mask zone trapeze
 	trapeze = Trapeze(meta.width, meta.height)
-	vertices = [np.array([trapeze.hl2, trapeze.hl3, trapeze.hr3, trapeze.hr2
-						   ], np.int32)]
+	vertices = [np.array([trapeze.hl2, trapeze.hl3, trapeze.hr3, trapeze.hr2], np.int32)]
 
 	processed_img = zone_mask(processed_img, vertices)
 	cv2.imshow('final', processed_img)
@@ -182,44 +176,30 @@ def process_img(image, meta):
 
 
 def screen_record():
-	x, y, w, h = 0, 0, 1280, 768
-	meta = MetaData.from_screen(w-x, h-y)
+	x, y, w, h = 0, 50, 1024, 768
+	meta = MetaData.from_screen(w - x, h - y)
 	arrow = Arrow(meta.width)
+	last_time = 0
 	with mss() as sct:
 		# Part of the screen to capture
 		monitor = {"top": y, "left": x, "width": w, "height": h}
-		active = True
-		while "Screen capturing":
-			# if cv2.waitKey(50) & 0xFF == ord("g"):
-			# 	active = not active
-			last_time = time.time()
-			# Get raw pixels from the screen, save it to a Numpy array
+		while True:
 			frame = numpy.array(sct.grab(monitor))
-			if active:
-				try:
-					processed_img = process_img(frame, meta)
-					lines = find_lines(processed_img)
-					# l1, l2 = separate_lines(lines)
-					# p = intersect_droit(l1, l2)
+			try:
+				processed_img = process_img(frame, meta)
+				lines = find_lines(processed_img)
+				p = separate_lines(lines)
+				cv2.circle(frame, (int(p.x), int(p.y)), 2, [0, 255, 255], 10)
+				arrow.add_point(int(p.x))
+			except:
+				pass
 
-					p = separate_lines(lines)
-					cv2.circle(frame, (int(p.x), int(p.y)), 2, [0, 255, 255], 10)
-					arrow.add_point(int(p.x))
-					# draw_infos(frame, p, l1, l2)
-					# cv2.imshow('window', processed_img)
-				except:
-					pass
-				draw_arrow(frame, arrow, meta.width)
-
-			# Display the picture
-
+			draw_arrow(frame, arrow, meta.width)
 			cv2.imshow("OpenCV/Numpy normal", frame)
 
-			# Display the picture in grayscale
-			# cv2.imshow('OpenCV/Numpy grayscale',
-			#            cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY))
-
-			print("fps: {}".format(1 / (time.time() - last_time)))
+			fps = "fps: {}".format(1 / (time.time() - last_time))
+			last_time = time.time()
+			print(fps)
 
 			# Press "q" to quit
 			if cv2.waitKey(50) & 0xFF == ord("q"):
@@ -245,21 +225,16 @@ def video_record(video):
 
 				processed_img = cv2.cvtColor(processed_img, cv2.COLOR_GRAY2BGR)
 
-
-
-				# draw_infos(processed_img, p, l1, l2)
-				# draw_arrow(processed_img, arrow, meta.width)
 				cv2.imshow('window', processed_img)
-
 				draw_infos(frame, p, l1, l2)
 				draw_arrow(frame, arrow, meta.width)
 				cv2.imshow('window', frame)
 
 			except:
 				pass
-			# draw_arrow(frame, arrow, meta.width)
+		# draw_arrow(frame, arrow, meta.width)
 
-			# cv2.imshow('window', frame)
+		# cv2.imshow('window', frame)
 		if cv2.waitKey(25) & 0xFF == ord('q'):
 			break
 

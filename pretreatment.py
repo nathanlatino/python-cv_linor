@@ -20,6 +20,9 @@ def apply_canny(img, threshold1 = 200, threshold2 = 300):
 def apply_gaussian(img, kernel = (5,5), sigmax = 0):
 	return cv2.GaussianBlur(img, kernel, sigmax)
 
+def thiken(img, size=2, iterations=1):
+	return morph(img, (size, size), iterations, mode="d")
+
 def morpho_process(img):
 	img2 = img
 	# delete lines
