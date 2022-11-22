@@ -10,6 +10,6 @@ numpy==1.18.4
 numpy2gif==1.0
 opencv-contrib-python==4.2.0.34
 opencv-python==4.2.0.34
-Pillow==7.1.2
+Pillow==9.3.0
 pyee==7.0.1
 pyscreenshot==1.0
